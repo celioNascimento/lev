@@ -1,5 +1,5 @@
-import { FerramentaCard } from '@/components/FerramentaCard'
-import { FERRAMENTAS } from '@/lib/ferramentas'
+import { Suspense } from 'react'
+import { AreaProtegida } from '@/components/AreaProtegida'
 
 export default function Home() {
   return (
@@ -10,11 +10,10 @@ export default function Home() {
           A gestão da casa, de um jeito simples. Escolha por onde começar.
         </p>
       </header>
-      <ul className="flex flex-col gap-4">
-        {FERRAMENTAS.map((f) => (
-          <FerramentaCard key={f.id} ferramenta={f} />
-        ))}
-      </ul>
+      {/* A sessão é lida em tempo de pedido, por isso fica atrás do Suspense. */}
+      <Suspense fallback={<p className="text-base text-zinc-600">Carregando…</p>}>
+        <AreaProtegida />
+      </Suspense>
     </main>
   )
 }
