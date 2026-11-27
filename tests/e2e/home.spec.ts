@@ -6,5 +6,5 @@ test('o site é instalável: o manifesto existe e tem ícones', async ({ request
   const manifesto = await resposta.json()
   expect(manifesto.name).toBe('Lev')
   expect(manifesto.display).toBe('standalone')
-  expect(manifesto.icons.length).toBeGreaterThanOrEqual(2)
+  expect(manifesto.icons.length).toBeGreaterThanOrEqual(3)
 })

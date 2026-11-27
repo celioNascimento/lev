@@ -19,7 +19,7 @@ export function FormularioEntrar({ enviando, erro, onEnviar }: Props) {
   }
 
   const classeCampo =
-    'mt-1 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base text-zinc-900 focus:border-teal-700 focus:outline-none focus:ring-2 focus:ring-teal-700/30'
+    'mt-1 w-full rounded-xl border border-zinc-300 bg-white px-4 py-3 text-base text-zinc-900 focus:border-lev-azul focus:outline-none focus:ring-2 focus:ring-lev-azul/30'
 
   return (
     <form onSubmit={aoEnviar} noValidate className="flex flex-col gap-5">
@@ -61,7 +61,7 @@ export function FormularioEntrar({ enviando, erro, onEnviar }: Props) {
       <button
         type="submit"
         disabled={enviando}
-        className="rounded-xl bg-teal-700 px-4 py-3 text-lg font-semibold text-white disabled:opacity-60"
+        className="rounded-xl bg-lev-azul px-4 py-3 text-lg font-semibold text-white hover:bg-lev-azul-escuro disabled:opacity-60"
       >
         {enviando ? 'Entrando…' : 'Entrar'}
       </button>

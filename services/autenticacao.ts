@@ -9,7 +9,7 @@ export async function entrarComSenha(email: string, senha: string): Promise<Resu
     const { error } = await criarClienteNavegador().auth.signInWithPassword({ email, password: senha })
     return { erro: error ? traduzirErroLogin(error) : null }
   } catch (e) {
-    return { erro: traduzirErroLogin({ message: e instanceof Error ? e.message : undefined }) }
+    return { erro: traduzirErroLogin({ name: e instanceof Error ? e.name : undefined, message: e instanceof Error ? e.message : undefined }) }
   }
 }
 

@@ -13,6 +13,8 @@ describe('traduzirErroLogin', () => {
 
   it('falha de rede', () => {
     expect(traduzirErroLogin({ message: 'Failed to fetch' })).toMatch(/Sem conexão/)
+    expect(traduzirErroLogin({ message: 'Load failed' })).toMatch(/Sem conexão/)
+    expect(traduzirErroLogin({ name: 'AuthRetryableFetchError', status: 0 })).toMatch(/Sem conexão/)
   })
 
   it('qualquer outro erro: mensagem genérica, sem detalhe técnico', () => {

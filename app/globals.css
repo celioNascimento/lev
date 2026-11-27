@@ -1,8 +1,14 @@
 @import "tailwindcss";
 
-/* Tema claro único por enquanto: simples e legível. */
+/* Cores tiradas do logo do Lev. Tema claro único por enquanto: simples e legível. */
+@theme inline {
+  --color-lev-azul: #1e1c6e;
+  --color-lev-azul-escuro: #14124d;
+  --color-lev-ouro: #d99a2b;
+}
+
 :root {
-  --background: #fafafa;
+  --background: #ffffff;
   --foreground: #18181b;
 }
 
