@@ -12,6 +12,15 @@ cp .env.example .env.local   # preencha com os valores do painel do Supabase
 npm run dev                  # http://localhost:3000
 ```
 
+## Publicar na Vercel
+
+Cadastre em *Settings → Environment Variables* (marque Production, Preview e Development):
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+
+Sem elas o build passa, mas o site responde erro em todas as telas. Depois de cadastrar ou mudar uma variável, faça um novo deploy (*Redeploy*), porque elas são embutidas no momento do build. Segredos (Pluggy) NÃO levam o prefixo `NEXT_PUBLIC_`.
+
 ## Testes
 
 ```bash
