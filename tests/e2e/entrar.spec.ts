@@ -18,8 +18,8 @@ test('campos vazios mostram um aviso simples', async ({ page }) => {
 
 test('senha errada mostra a mesma mensagem de sempre', async ({ page }) => {
   await page.goto('/entrar')
-  await page.getByLabel('E-mail').fill('nao.existe@exemplo.invalid')
-  await page.getByLabel('Senha').fill('senha-errada-123')
+  await page.getByLabel('E-mail', { exact: true }).fill('nao.existe@exemplo.invalid')
+  await page.getByLabel('Senha', { exact: true }).fill('senha-errada-123')
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(page.locator('form p[role="alert"]')).toHaveText('E-mail ou senha incorretos.')
 })
@@ -27,8 +27,8 @@ test('senha errada mostra a mesma mensagem de sempre', async ({ page }) => {
 test('entra com a conta de teste e sai', async ({ page }) => {
   test.skip(!email || !senha, 'defina E2E_EMAIL e E2E_SENHA')
   await page.goto('/entrar')
-  await page.getByLabel('E-mail').fill(email!)
-  await page.getByLabel('Senha').fill(senha!)
+  await page.getByLabel('E-mail', { exact: true }).fill(email!)
+  await page.getByLabel('Senha', { exact: true }).fill(senha!)
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(page.getByRole('heading', { name: 'Cuidar do veículo' })).toBeVisible()
   await page.getByRole('button', { name: 'Sair' }).click()
