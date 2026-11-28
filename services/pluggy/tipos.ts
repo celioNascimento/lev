@@ -51,6 +51,7 @@ export type InvestimentoPluggy = {
   balance: number
   amount?: number | null
   amountProfit?: number | null
+  amountOriginal?: number | null
   date?: string | null
   issuer?: string | null
   currencyCode?: string
