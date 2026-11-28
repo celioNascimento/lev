@@ -39,3 +39,10 @@ export function decidirRota(caminho: string, estado: EstadoDeAcesso): DecisaoDeR
   if (caminho === ENTRAR || caminho === VERIFICAR) return ir('/')
   return seguir()
 }
+
+// Rotas que se protegem sozinhas, com um segredo próprio, e por isso NÃO passam pela barreira
+// de login: quem chama (o agendador da Vercel) não tem sessão nem cookies.
+// Toda rota nova sob /api/cron/ precisa conferir o CRON_SECRET por conta própria.
+export function rotaComSegredoProprio(caminho: string): boolean {
+  return caminho.startsWith('/api/cron/')
+}

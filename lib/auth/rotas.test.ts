@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { decidirRota, type EstadoDeAcesso } from './rotas'
+import { decidirRota, rotaComSegredoProprio, type EstadoDeAcesso } from './rotas'
 
 const semLogin: EstadoDeAcesso = { logado: false, nivel: null, temAparelho: false }
 const soSenhaSemAparelho: EstadoDeAcesso = { logado: true, nivel: 'aal1', temAparelho: false }
@@ -32,5 +32,21 @@ describe('decidirRota', () => {
     expect(decidirRota('/seguranca/configurar', completo)).toEqual({ tipo: 'seguir' })
     expect(decidirRota('/entrar', completo)).toEqual({ tipo: 'redirecionar', para: '/' })
     expect(decidirRota('/verificar', completo)).toEqual({ tipo: 'redirecionar', para: '/' })
+  })
+})
+
+describe('rotaComSegredoProprio', () => {
+  it('libera só as rotas do cron', () => {
+    expect(rotaComSegredoProprio('/api/cron/sincronizar')).toBe(true)
+    expect(rotaComSegredoProprio('/api/cron/outra-coisa')).toBe(true)
+  })
+
+  it('não libera telas, outras APIs nem nomes parecidos', () => {
+    expect(rotaComSegredoProprio('/')).toBe(false)
+    expect(rotaComSegredoProprio('/entrar')).toBe(false)
+    expect(rotaComSegredoProprio('/api/outra')).toBe(false)
+    expect(rotaComSegredoProprio('/api/cron')).toBe(false)
+    expect(rotaComSegredoProprio('/api/cronos/x')).toBe(false)
+    expect(rotaComSegredoProprio('/x/api/cron/y')).toBe(false)
   })
 })
