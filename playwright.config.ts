@@ -8,7 +8,12 @@ export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
   reporter: [['list']],
-  use: { baseURL, trace: 'on-first-retry' },
+  // E2E_CHROME_PATH permite usar um Chrome já instalado em vez de baixar o do Playwright.
+  use: {
+    baseURL,
+    trace: 'on-first-retry',
+    launchOptions: { executablePath: process.env.E2E_CHROME_PATH || undefined, args: process.env.E2E_CHROME_PATH ? ['--no-sandbox'] : [] },
+  },
   projects: [{ name: 'celular', use: { ...devices['Pixel 7'] } }],
   webServer: process.env.E2E_BASE_URL
     ? undefined

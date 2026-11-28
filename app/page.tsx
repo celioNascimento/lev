@@ -1,20 +1,23 @@
-import { FerramentaCard } from '@/components/FerramentaCard'
-import { FERRAMENTAS } from '@/lib/ferramentas'
+import { Suspense } from 'react'
+import { AreaProtegida } from '@/components/AreaProtegida'
+import { Logo } from '@/components/Logo'
 
 export default function Home() {
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-5 py-10">
-      <header>
-        <h1 className="text-3xl font-bold text-zinc-900">Lev</h1>
-        <p className="mt-2 text-lg text-zinc-600">
-          A gestão da casa, de um jeito simples. Escolha por onde começar.
-        </p>
+      <header className="flex items-center gap-4">
+        <Logo largura={72} />
+        <div>
+          <h1 className="sr-only">Lev</h1>
+          <p className="text-lg text-zinc-600">
+            A gestão da casa, de um jeito simples. Escolha por onde começar.
+          </p>
+        </div>
       </header>
-      <ul className="flex flex-col gap-4">
-        {FERRAMENTAS.map((f) => (
-          <FerramentaCard key={f.id} ferramenta={f} />
-        ))}
-      </ul>
+      {/* A sessão é lida em tempo de pedido, por isso fica atrás do Suspense. */}
+      <Suspense fallback={<p className="text-base text-zinc-600">Carregando…</p>}>
+        <AreaProtegida />
+      </Suspense>
     </main>
   )
 }
