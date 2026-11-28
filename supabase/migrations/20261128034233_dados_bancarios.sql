@@ -92,23 +92,39 @@ create index investimentos_casa_id_idx on public.investimentos (casa_id);
 create index investimentos_conexao_id_idx on public.investimentos (conexao_id);
 
 -- RLS + permissões: leitura só para membros logados (com segundo fator); sem política de
--- escrita, então escrita por usuários é negada.
-do $$
-declare
-  t text;
-begin
-  foreach t in array array[
-    'conexoes_bancarias', 'contas_bancarias', 'transacoes_bancarias',
-    'faturas_cartao', 'investimentos'
-  ]
-  loop
-    execute format('alter table public.%I enable row level security', t);
-    execute format('revoke all on public.%I from anon, authenticated', t);
-    execute format('grant select on public.%I to authenticated', t);
-    execute format(
-      'create policy %I on public.%I for select to authenticated using (public.sou_membro_da_casa(casa_id))',
-      t || '_ver_da_minha_casa', t
-    );
-  end loop;
-end
-$$;
+-- escrita, então escrita por usuários é negada. (Escrito tabela a tabela, sem laço.)
+
+alter table public.conexoes_bancarias enable row level security;
+revoke all on public.conexoes_bancarias from anon, authenticated;
+grant select on public.conexoes_bancarias to authenticated;
+create policy conexoes_bancarias_ver_da_minha_casa on public.conexoes_bancarias
+  for select to authenticated
+  using (public.sou_membro_da_casa(casa_id));
+
+alter table public.contas_bancarias enable row level security;
+revoke all on public.contas_bancarias from anon, authenticated;
+grant select on public.contas_bancarias to authenticated;
+create policy contas_bancarias_ver_da_minha_casa on public.contas_bancarias
+  for select to authenticated
+  using (public.sou_membro_da_casa(casa_id));
+
+alter table public.transacoes_bancarias enable row level security;
+revoke all on public.transacoes_bancarias from anon, authenticated;
+grant select on public.transacoes_bancarias to authenticated;
+create policy transacoes_bancarias_ver_da_minha_casa on public.transacoes_bancarias
+  for select to authenticated
+  using (public.sou_membro_da_casa(casa_id));
+
+alter table public.faturas_cartao enable row level security;
+revoke all on public.faturas_cartao from anon, authenticated;
+grant select on public.faturas_cartao to authenticated;
+create policy faturas_cartao_ver_da_minha_casa on public.faturas_cartao
+  for select to authenticated
+  using (public.sou_membro_da_casa(casa_id));
+
+alter table public.investimentos enable row level security;
+revoke all on public.investimentos from anon, authenticated;
+grant select on public.investimentos to authenticated;
+create policy investimentos_ver_da_minha_casa on public.investimentos
+  for select to authenticated
+  using (public.sou_membro_da_casa(casa_id));
