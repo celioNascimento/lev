@@ -9,6 +9,8 @@ export async function entrarComSenha(email: string, senha: string): Promise<Resu
     const { error } = await criarClienteNavegador().auth.signInWithPassword({ email, password: senha })
     return { erro: error ? traduzirErroLogin(error) : null }
   } catch (e) {
+    // Sem dados sensíveis: só o motivo técnico, para diagnóstico no console do navegador.
+    console.error('Falha inesperada ao entrar:', e instanceof Error ? e.message : e)
     return { erro: traduzirErroLogin({ name: e instanceof Error ? e.name : undefined, message: e instanceof Error ? e.message : undefined }) }
   }
 }
