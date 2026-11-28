@@ -16,6 +16,11 @@ const TEMPO_LIMITE_MS = 15_000
 // A chave do Pluggy dura 2h; renovamos antes disso.
 const VALIDADE_CHAVE_MS = 100 * 60 * 1000
 const MAX_PAGINAS = 100
+// Falhas de "porta de entrada" do Pluggy (502/503/504) costumam ser passageiras: tenta de novo.
+// Ao todo 3 tentativas, com pausas de 1s e 3s. Erro de credencial (401/403), de rede e de
+// tempo esgotado NÃO repetem, para uma falha real não demorar nem ficar escondida.
+const STATUS_TENTAR_DE_NOVO = new Set([502, 503, 504])
+const PAUSAS_ENTRE_TENTATIVAS_MS = [1000, 3000]
 
 export class ErroPluggy extends Error {
   constructor(
@@ -35,24 +40,41 @@ export type OpcoesCliente = {
   config: ConfigPluggy
   fetchFn?: typeof fetch
   agora?: () => number
+  // Troca a pausa real por outra função (usado nos testes).
+  esperar?: (ms: number) => Promise<void>
 }
 
-export function criarClientePluggy({ config, fetchFn = fetch, agora = Date.now }: OpcoesCliente) {
+const esperarDeVerdade = (ms: number) => new Promise<void>((ok) => setTimeout(ok, ms))
+
+export function criarClientePluggy({
+  config,
+  fetchFn = fetch,
+  agora = Date.now,
+  esperar = esperarDeVerdade,
+}: OpcoesCliente) {
   let chave: { valor: string; expiraEm: number } | null = null
 
   async function chamar(caminho: string, init: RequestInit): Promise<unknown> {
-    let resposta: Response
-    try {
-      resposta = await fetchFn(`${URL_BASE}${caminho}`, {
-        ...init,
-        signal: AbortSignal.timeout(TEMPO_LIMITE_MS),
-        cache: 'no-store',
-      })
-    } catch {
-      // Não repassamos o erro original para não vazar cabeçalhos ou URLs.
-      throw new ErroPluggy('Não foi possível falar com o Pluggy (rede ou tempo esgotado).', 0)
-    }
-    if (!resposta.ok) {
+    for (let tentativa = 0; ; tentativa++) {
+      let resposta: Response
+      try {
+        resposta = await fetchFn(`${URL_BASE}${caminho}`, {
+          ...init,
+          signal: AbortSignal.timeout(TEMPO_LIMITE_MS),
+          cache: 'no-store',
+        })
+      } catch {
+        // Não repassamos o erro original para não vazar cabeçalhos ou URLs.
+        throw new ErroPluggy('Não foi possível falar com o Pluggy (rede ou tempo esgotado).', 0)
+      }
+
+      if (resposta.ok) return resposta.json()
+
+      if (STATUS_TENTAR_DE_NOVO.has(resposta.status) && tentativa < PAUSAS_ENTRE_TENTATIVAS_MS.length) {
+        await esperar(PAUSAS_ENTRE_TENTATIVAS_MS[tentativa])
+        continue
+      }
+
       let codigo: string | undefined
       try {
         const corpo = (await resposta.json()) as { code?: string; codeDescription?: string }
@@ -66,7 +88,6 @@ export function criarClientePluggy({ config, fetchFn = fetch, agora = Date.now }
         codigo,
       )
     }
-    return resposta.json()
   }
 
   async function autenticar(): Promise<string> {
