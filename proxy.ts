@@ -2,11 +2,12 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { decidirRota } from '@/lib/auth/rotas'
 import { atualizarSessao } from '@/lib/supabase/proxy'
 
-// Primeira barreira: sem login, só a tela /entrar abre. A segunda barreira é a checagem
-// no servidor dentro da própria tela (components/AreaProtegida) e a última é o RLS no banco.
+// Primeira barreira: conforme o estágio do login (veja lib/auth/rotas.ts), só algumas telas abrem.
+// A segunda é a checagem no servidor dentro da própria tela (components/AreaProtegida)
+// e a última é o RLS no banco, que também exige o código (nível aal2).
 export async function proxy(request: NextRequest) {
-  const { resposta, usuario } = await atualizarSessao(request)
-  const decisao = decidirRota(request.nextUrl.pathname, Boolean(usuario))
+  const { resposta, estado } = await atualizarSessao(request)
+  const decisao = decidirRota(request.nextUrl.pathname, estado)
   if (decisao.tipo === 'seguir') return resposta
 
   const destino = request.nextUrl.clone()

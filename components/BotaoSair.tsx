@@ -3,7 +3,9 @@
 import { useRouter } from 'next/navigation'
 import { sair } from '@/services/autenticacao'
 
-export function BotaoSair() {
+type Props = { rotulo?: string }
+
+export function BotaoSair({ rotulo = 'Sair' }: Props) {
   const router = useRouter()
 
   async function aoClicar() {
@@ -18,7 +20,7 @@ export function BotaoSair() {
       onClick={aoClicar}
       className="rounded-xl border border-zinc-300 bg-white px-4 py-2 text-base font-medium text-zinc-800"
     >
-      Sair
+      {rotulo}
     </button>
   )
 }
