@@ -131,6 +131,54 @@ describe('cliente Pluggy', () => {
   })
 })
 
+describe('tentar de novo em falhas passageiras', () => {
+  const comEspera = () => {
+    const esperas: number[] = []
+    return { esperas, esperar: async (ms: number) => void esperas.push(ms) }
+  }
+
+  it('502 e depois sucesso: tenta de novo e devolve o resultado', async () => {
+    const { esperas, esperar } = comEspera()
+    const { fn, chamadas } = fetchFalso([
+      { status: 502, corpo: {} },
+      auth,
+      { corpo: { id: 'item-1', status: 'UPDATED' } },
+    ])
+    const c = criarClientePluggy({ config, fetchFn: fn, esperar })
+    expect((await c.buscarItem()).id).toBe('item-1')
+    expect(chamadas.filter((x) => x.url.endsWith('/auth'))).toHaveLength(2)
+    expect(esperas).toEqual([1000])
+  })
+
+  it('502, 503 e 504 seguidos: 3 tentativas, pausas de 1s e 3s e depois falha com o status', async () => {
+    const { esperas, esperar } = comEspera()
+    const { fn, chamadas } = fetchFalso([
+      { status: 502, corpo: {} },
+      { status: 503, corpo: {} },
+      { status: 504, corpo: {} },
+    ])
+    const erro = await criarClientePluggy({ config, fetchFn: fn, esperar }).buscarItem().catch((e: unknown) => e)
+    expect(erro).toBeInstanceOf(ErroPluggy)
+    expect((erro as ErroPluggy).status).toBe(504)
+    expect(chamadas).toHaveLength(3)
+    expect(esperas).toEqual([1000, 3000])
+  })
+
+  it('erro de credencial (401) e de rede NÃO repetem', async () => {
+    const a = comEspera()
+    const r401 = fetchFalso([{ status: 401, corpo: { codeDescription: 'CLIENT_KEYS_UNAUTHORIZED' } }])
+    await criarClientePluggy({ config, fetchFn: r401.fn, esperar: a.esperar }).buscarItem().catch(() => {})
+    expect(r401.chamadas).toHaveLength(1)
+    expect(a.esperas).toEqual([])
+
+    const b = comEspera()
+    const rede = vi.fn(async () => { throw new Error('x') }) as unknown as typeof fetch
+    await criarClientePluggy({ config, fetchFn: rede, esperar: b.esperar }).buscarItem().catch(() => {})
+    expect(rede).toHaveBeenCalledTimes(1)
+    expect(b.esperas).toEqual([])
+  })
+})
+
 describe('diasParaVencerAutorizacao', () => {
   const dia = 86_400_000
   const hoje = Date.parse('2026-11-28T00:00:00Z')
